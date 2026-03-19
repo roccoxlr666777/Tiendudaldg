@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import os
-import io
 
 # ==========================================
 # 1. CONFIGURACIÓN DE PÁGINA Y ESTILOS
@@ -42,7 +41,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. FUNCIONES DE BACKEND (VOTOS Y ARCHIVOS)
+# 2. FUNCIONES DE BACKEND (VOTOS)
 # ==========================================
 ARCHIVO_VOTOS = "votos_udal.csv"
 
@@ -58,15 +57,6 @@ def registrar_voto(diseno_elegido):
     df_votos.to_csv(ARCHIVO_VOTOS, index=False)
     st.session_state.voto_registrado = True 
 
-# Buscador inteligente de imágenes (ignora mayúsculas/minúsculas en la extensión)
-def buscar_imagen(nombre_base):
-    extensiones = ['.png', '.jpg', '.jpeg', '.PNG', '.JPG', '.JPEG']
-    for ext in extensiones:
-        if os.path.exists(nombre_base + ext):
-            return nombre_base + ext
-    return None
-
-# Carga inicial de votos
 cargar_votos()
 
 # ==========================================
@@ -87,9 +77,8 @@ with col_disenos:
     
     # 1. VANDAL ROOTS
     with grid_col1:
-        img_vandal = buscar_imagen("1000332584") # Busca el archivo original sin importar extensión
-        if img_vandal: st.image(img_vandal, use_container_width=True)
-        else: st.error("Falta 1000332584.png")
+        if os.path.exists("vandal_roots.jpg"): st.image("vandal_roots.jpg", use_container_width=True)
+        else: st.error("Falta: vandal_roots.jpg")
         
         st.markdown("<h4 style='color:#f2a900; margin-top:10px;'>VANDAL ROOTS</h4>", unsafe_allow_html=True)
         st.caption("<b style='font-size:1.1rem;'>Luce con orgullo tu escuela</b>", unsafe_allow_html=True)
@@ -97,9 +86,8 @@ with col_disenos:
             
     # 2. AGGROUDAL
     with grid_col2:
-        img_aggro = buscar_imagen("1000332580")
-        if img_aggro: st.image(img_aggro, use_container_width=True)
-        else: st.error("Falta 1000332580.jpg")
+        if os.path.exists("aggroudal.jpg"): st.image("aggroudal.jpg", use_container_width=True)
+        else: st.error("Falta: aggroudal.jpg")
         
         st.markdown("<h4 style='color:#f2a900; margin-top:10px;'>AGGROUDAL</h4>", unsafe_allow_html=True)
         st.caption("<b style='font-size:1.1rem;'>Viste como lo que eres, se fuerte, se exitoso</b>", unsafe_allow_html=True)
@@ -110,9 +98,8 @@ with col_disenos:
     
     # 3. STREET
     with grid_col3:
-        img_street = buscar_imagen("1000332585")
-        if img_street: st.image(img_street, use_container_width=True)
-        else: st.error("Falta 1000332585.jpg")
+        if os.path.exists("street.jpg"): st.image("street.jpg", use_container_width=True)
+        else: st.error("Falta: street.jpg")
         
         st.markdown("<h4 style='color:#f2a900; margin-top:10px;'>STREET</h4>", unsafe_allow_html=True)
         st.caption("<b style='font-size:1.1rem;'>Orgullos que se viste</b> | Pocas piezas disponibles", unsafe_allow_html=True)
@@ -120,9 +107,8 @@ with col_disenos:
             
     # 4. LEOR
     with grid_col4:
-        img_leor = buscar_imagen("1000332593")
-        if img_leor: st.image(img_leor, use_container_width=True)
-        else: st.error("Falta 1000332593.jpg")
+        if os.path.exists("leor.jpg"): st.image("leor.jpg", use_container_width=True)
+        else: st.error("Falta: leor.jpg")
         
         st.markdown("<h4 style='color:#f2a900; margin-top:10px;'>LEOR</h4>", unsafe_allow_html=True)
         st.write("<b style='font-size:0.95rem;'>1- Tu estilo pide más... Nosotros ya lo creamos. Solo tómalo.</b>", unsafe_allow_html=True)
@@ -152,38 +138,37 @@ with col_interaccion:
 st.markdown("---")
 
 # ==========================================
-# 4. SECCIÓN NUEVA: DESCARGA DE STICKERS
+# 4. SECCIÓN: DESCARGA DE STICKERS
 # ==========================================
 st.markdown("<h3 class='neon-sub'>¡Descarga tu Sticker UDAL!</h3>", unsafe_allow_html=True)
 st.write("Compártelo en redes y mándanos foto a WhatsApp para participar en la rifa de lanzamiento.")
 
 col_s1, col_s2, col_s3, col_s4 = st.columns(4)
 
-# Función segura para generar botón de descarga
-def descargar_sticker(columna, nombre_base, titulo_sticker):
+# Función para cargar y descargar stickers
+def mostrar_sticker(columna, archivo_sticker, titulo):
     with columna:
-        ruta_archivo = buscar_imagen(nombre_base)
-        if ruta_archivo:
-            st.image(ruta_archivo, use_container_width=True)
-            st.markdown(f"<h4 style='color:#f2a900; font-size:1.2rem;'>{titulo_sticker}</h4>", unsafe_allow_html=True)
+        if os.path.exists(archivo_sticker):
+            st.image(archivo_sticker, use_container_width=True)
+            st.markdown(f"<h4 style='color:#f2a900; font-size:1.2rem;'>{titulo}</h4>", unsafe_allow_html=True)
             
-            # Lee el archivo real para que se descargue
-            with open(ruta_archivo, "rb") as file:
-                btn = st.download_button(
+            # Descarga real del archivo
+            with open(archivo_sticker, "rb") as file:
+                st.download_button(
                     label="DESCARGAR ⬇️",
                     data=file,
-                    file_name=f"UDAL_{titulo_sticker}.png",
-                    mime="image/png"
+                    file_name=f"UDAL_{titulo}.png",
+                    mime="image/png",
+                    key=f"dl_{titulo}"
                 )
         else:
-            # Si no lo encuentra, te avisa claramente
-            st.error(f"⚠️ Sube a GitHub el archivo: {nombre_base}.png (o .jpg)")
+            st.error(f"⚠️ Falta archivo: {archivo_sticker}")
 
-# Nombres que debes ponerle a los 4 archivos de stickers en GitHub:
-descargar_sticker(col_s1, "sticker_vandal", "VANDAL ROOTS")
-descargar_sticker(col_s2, "sticker_aggro", "AGGROUDAL")
-descargar_sticker(col_s3, "sticker_street", "STREET")
-descargar_sticker(col_s4, "sticker_leor", "LEOR")
+# Aquí están estrictamente los nombres que me pediste
+mostrar_sticker(col_s1, "sticker_1.PNG", "VANDAL ROOTS")
+mostrar_sticker(col_s2, "sticker_2.PNG", "AGGROUDAL")
+mostrar_sticker(col_s3, "sticker_3.PNG", "STREET")
+mostrar_sticker(col_s4, "sticker_4.PNG", "LEOR")
 
 st.markdown("---")
 
