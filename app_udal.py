@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
-import random
+import io
 
 # ==========================================
 # 1. CONFIGURACIÓN DE PÁGINA (ESTILO GRÁFICO UDAL)
@@ -14,75 +14,57 @@ st.set_page_config(
 )
 
 # ==========================================
-# 2. INYECCIÓN DE DISEÑO VISUAL (CSS) - NEÓN Y TIPOGRAFÍAS
+# 2. INYECCIÓN DE DISEÑO VISUAL (CSS)
 # ==========================================
 st.markdown("""
     <style>
-    /* Fondo General Oscuro */
-    .stApp {
-        background-color: #080808; 
-    }
+    /* Fondo General Oscuro y fuentes profesionales */
+    .stApp { background-color: #080808; }
 
-    /* SISTEMA TIPOGRÁFICO: Google Fonts */
     @import url('https://fonts.googleapis.com/css2?family=Anton&family=Open+Sans:wght@400;700&display=swap');
 
-    /* Títulos Principales (Anton) - EFECTO NEÓN (UDAL Colors) */
-    h1, h2 {
+    h1, h2, h3, h4 {
         font-family: 'Anton', sans-serif !important;
         text-transform: uppercase;
         letter-spacing: 2px;
         text-align: center;
     }
     
-    /* Neón UDAL Azul Rey */
     .neon-title {
         color: #fff;
-        text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #002366, 0 0 20px #002366, 0 0 25px #002366;
-        font-size: 3rem !important;
-        margin-bottom: 30px;
+        text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #002366, 0 0 20px #002366;
+        font-size: 3.2rem !important;
+        margin-bottom: 25px;
     }
     
-    /* Neón Rojo Sangre */
     .neon-sub {
         color: #fff;
-        text-shadow: 0 0 5px #fff, 0 0 10px #880808, 0 0 15px #880808, 0 0 20px #880808;
-        font-size: 1.8rem !important;
+        text-shadow: 0 0 5px #fff, 0 0 10px #880808, 0 0 15px #880808;
+        font-size: 2rem !important;
         margin-bottom: 20px;
-        font-family: 'Anton', sans-serif !important;
     }
 
-    /* Texto General (Open Sans) */
-    p, li, .stMarkdown, .stButton {
+    /* Texto General: Open Sans con ajuste automático de palabras */
+    p, li, .stMarkdown, .stCaption {
         font-family: 'Open Sans', sans-serif !important;
         color: #ccc;
+        line-height: 1.5 !important;
+        word-wrap: break-word; 
+        overflow-wrap: break-word;
     }
 
-    /* Cajas de Contenido con Borde Neón Azul Rey */
+    /* Caja de Contenido Estilo UDAL */
     .udal-card {
         background-color: #1a1a1a;
-        padding: 25px;
-        border-radius: 12px;
+        padding: 30px;
+        border-radius: 15px;
         border: 2px solid #002366;
         box-shadow: 0 4px 20px rgba(0, 35, 102, 0.4);
         margin-bottom: 25px;
     }
 
-    /* Estilo del Banner de En Construcción */
-    .construction-banner {
-        background: linear-gradient(45deg, #002366, #880808, #f2a900);
-        color: black;
-        padding: 12px;
-        text-align: center;
-        font-weight: bold;
-        text-transform: uppercase;
-        border-radius: 5px;
-        margin-bottom: 30px;
-        font-family: 'anton', sans-serif !important;
-        font-size: 1.2rem;
-    }
-
-    /* Estilo de los Botones de Votación y WhatsApp */
-    .stButton>button, a.udal-btn {
+    /* Botones de Descarga y Contacto con el look neón */
+    .stDownloadButton>button, a.udal-contact-btn {
         background-color: transparent !important;
         color: #f2a900 !important;
         border: 2px solid #f2a900 !important;
@@ -95,182 +77,127 @@ st.markdown("""
         display: block;
         padding: 12px;
         text-decoration: none;
+        font-family: 'Open Sans', sans-serif !important;
     }
-    .stButton>button:hover, a.udal-btn:hover {
+    .stDownloadButton>button:hover, a.udal-contact-btn:hover {
         background-color: #f2a900 !important;
         color: black !important;
         box-shadow: 0 0 15px #f2a900 !important;
     }
-    
-    /* Estilo Sticker para Promociones */
-    .sticker-promo {
-        display: inline-block;
-        background-color: #222;
-        color: #f2a900;
-        padding: 8px 15px;
-        margin: 5px;
-        border-radius: 20px;
-        border: 2px dashed #f2a900;
-        font-family: 'Anton', sans-serif !important;
-        text-transform: uppercase;
+
+    /* Logo de WhatsApp para contacto */
+    .whatsapp-logo-container {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    .whatsapp-logo-container img {
+        width: 60px;
+        transition: 0.3s;
+    }
+    .whatsapp-logo-container img:hover {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 10px #25d366);
     }
 
-    /* Ocultar elementos estándar de Streamlit */
-    #MainMenu, footer {visibility: hidden;}
-    header {visibility: hidden;}
+    #MainMenu, footer, header {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 3. SISTEMA DE VOTACIÓN (CEREBRO / BACK-END)
+# 3. INTERFAZ PRINCIPAL (DRAFTING)
 # ==========================================
-# Archivo donde guardaremos los votos de forma persistente
-ARCHIVO_VOTOS = "votos_udal.csv"
-
-# Función para inicializar o cargar el archivo de votos
-def cargar_votos():
-    if not os.path.exists(ARCHIVO_VOTOS):
-        # Si no existe, creamos el archivo con 0 votos
-        df = pd.DataFrame({
-            'Diseño': ["VANDAL ROOTS", "AGGROUDAL", "STREET", "LEOR"],
-            'Votos': [0, 0, 0, 0]
-        })
-        df.to_csv(ARCHIVO_VOTOS, index=False)
-    return pd.read_csv(ARCHIVO_VOTOS)
-
-# Función para registrar un voto real
-def registrar_voto(diseno_elegido):
-    df_votos = cargar_votos()
-    # Busca el diseño en el CSV y le suma 1 voto
-    df_votos.loc[df_votos['Diseño'] == diseno_elegido, 'Votos'] += 1
-    # Guarda el archivo actualizado
-    df_votos.to_csv(ARCHIVO_VOTOS, index=False)
-    st.session_state.voto_registrado = True # Memoria temporal para mostrar éxito
-
-# Carga inicial de votos para las barras de progreso
-cargar_votos()
-
-# ==========================================
-# 4. INTERFAZ PRINCIPAL
-# ==========================================
-
-# Banner de Status
-st.markdown("<div class='construction-banner'>🚧 STOREFRONT UDAL: EN CONSTRUCCIÓN 🚧</div>", unsafe_allow_html=True)
 
 # Encabezado Neón
 st.markdown("<h1 class='neon-title'>Urban Development Academic Lab</h1>", unsafe_allow_html=True)
 st.markdown("<h2 class='neon-sub'>Diseño Gráfico UDAL</h2>", unsafe_allow_html=True)
 
-# Layout: Dos columnas principales (Diseños a la izq, Interacción a la der)
-col_disenos, col_interaccion = st.columns([3, 1])
-
-# --- COLUMNA IZQUIERDA: LOS 4 DISEÑOS ---
-with col_disenos:
-    st.markdown("<div class='udal-card'>", unsafe_allow_html=True)
-    st.markdown("### 🖼️ Catálogo Próximamente Disponible</h3>", unsafe_allow_html=True)
-    
-    # Maquetamos los diseños en 2 columnas (2x2)
-    grid_col1, grid_col2 = st.columns(2)
-    
-    # 1. VANDAL ROOTS
-    with grid_col1:
-        st.image("vandal_roots.png", use_container_width=True)
-        st.markdown("<b style='color:#f2a900;'>VANDAL ROOTS</b>", unsafe_allow_html=True)
-        st.write("*(Emoji Sticker Style)*")
-        st.caption("“Luce con orgullo tu escuela”")
-        if st.button("🗳️ Votar por VANDAL ROOTS", key="vote_vandal"):
-            registrar_voto("VANDAL ROOTS")
-            
-    # 2. AGGROUDAL
-    with grid_col2:
-        st.image("aggroudal.png", use_container_width=True)
-        st.markdown("<b style='color:#f2a900;'>AGGROUDAL</b>", unsafe_allow_html=True)
-        st.write("*(Chamarra negra / Chavos Fuertes)*")
-        st.caption("“Viste como lo que eres, se fuerte, se exitoso”")
-        if st.button("🗳️ Votar por AGGROUDAL", key="vote_aggro"):
-            registrar_voto("AGGROUDAL")
-    
-    # Espacio entre filas
-    st.write("---")
-    grid_col3, grid_col4 = st.columns(2)
-    
-    # 3. STREET
-    with grid_col3:
-        st.image("street.png", use_container_width=True)
-        st.markdown("<b style='color:#f2a900;'>STREET</b>", unsafe_allow_html=True)
-        st.write("*(El más neón)*")
-        st.caption("“Orgullos que se viste” | (Pocas piezas disponibles)")
-        if st.button("🗳️ Votar por STREET", key="vote_street"):
-            registrar_voto("STREET")
-            
-    # 4. LEOR
-    with grid_col4:
-        st.image("leor.png", use_container_width=True)
-        st.markdown("<b style='color:#f2a900;'>LEOR</b>", unsafe_allow_html=True)
-        st.write("*(Azul con dorado)*")
-        st.caption("1- “Tu estilo pide más... Nosotros ya lo creamos. Solo tómalo.”")
-        st.caption("2- “No es ropa cualquiera... es la que todos quisieran tener.”")
-        if st.button("🗳️ Votar por LEOR", key="vote_leor"):
-            registrar_voto("LEOR")
-            
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# --- COLUMNA DERECHA: INTERACCIÓN Y PROMOS ---
-with col_interaccion:
-    
-    # Caja 1: Zona de Votación y Resultados (Cerebro)
-    st.markdown("<div class='udal-card'>", unsafe_allow_html=True)
-    st.markdown("<h4 style='color: #880808;'>🗳️ Resultados en Tiempo Real</h4>", unsafe_allow_html=True)
-    st.write("¿Cuál de estos diseños neon-graffiti deberíamos lanzar primero?")
-    
-    # Mostramos mensaje de éxito si ya votó (sin globos)
-    if 'voto_registrado' in st.session_state and st.session_state.voto_registrado:
-        st.success("¡Voto registrado en el servidor! Gracias por apoyar a tu favorito.")
-        st.session_state.voto_registrado = False # Reset
-        
-    # Cargamos votos actualizados para mostrar las barras
-    df_actualizado = cargar_votos()
-    total_votos = df_actualizado['Votos'].sum()
-    
-    for _, row in df_actualizado.iterrows():
-        st.markdown(f"<b style='color:#ccc;'>{row['Diseño']}</b>: {row['Votos']} votos", unsafe_allow_html=True)
-        if total_votos > 0:
-            progreso = row['Votos'] / total_votos
-            st.progress(progreso)
-        else:
-            st.progress(0)
-    
-    st.markdown("</div>", unsafe_allow_html=True)
-    
-    # Caja 2: Integración WhatsApp y Código QR
-    st.markdown("<div class='udal-card'>", unsafe_allow_html=True)
-    st.markdown("<h4 style='color: #002366;'>📲 Pre-pedidos WhatsApp</h4>", unsafe_allow_html=True)
-    st.write("Escanea o da clic para separar tu diseño exclusivo.")
-    
-    # NÚMERO DE EJEMPLO DEL USUARIO: +52 221 653 1593 (formateado)
-    whatsapp_url = "https://wa.me/5212216531593?text=Hola UDAL Academic Lab, quiero info sobre las nuevas sudaderas neón."
-    
-    # Usamos una API gratuita para generar el QR side-by-side
-    st.markdown(f'<a href="{whatsapp_url}"><img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={whatsapp_url}" width="150" style="border: 2px solid #002366;"></a>', unsafe_allow_html=True)
-    st.write("") # Espacio
-    
-    st.markdown(f'<a href="{whatsapp_url}" class="udal-btn">Abrir WhatsApp</a>', unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# ==========================================
-# 5. SECCIÓN DE PROMOCIONES (STICKER STYLE)
-# ==========================================
-st.markdown("---")
-st.markdown("<h3 class='neon-sub'>¡Apoya a tu favorito! (Opciones UDAL)</h3>", unsafe_allow_html=True)
-
+# Sección 1: Instrucciones Generales
+st.markdown("<div class='udal-card'>", unsafe_allow_html=True)
 st.markdown("""
-<div class='udal-card' style='text-align:center;'>
-    <div class='sticker-promo'>VANDAL ROOTS Sticker #UDAL</div>
-    <div class='sticker-promo'>AGGROUDAL Strong style</div>
-    <div class='sticker-promo'>STREET Neon Look</div>
-    <div class='sticker-promo'>LEOR Golden vibes</div>
-    <p style='margin-top:10px;'>Invita a tus amigos a votar y prepárate para recompensas exclusivas en el lanzamiento.</p>
-</div>
+### ¡Descarga el sticker de tu diseño preferido! </h3>
+<p style='text-align:center;'>
+Compártelo, úsalo en tus redes sociales, pégalo, etc. Y mándanos una foto para obtener beneficios o premios de lanzamiento y participar en la rifa de prendas.
+</p>
 """, unsafe_allow_html=True)
+st.markdown("</div>", unsafe_allow_html=True)
 
-st.warning("⚠️ Zona de recompensas e instrucciones finales en construcción (esperando imágenes de los muchachos y las instrucciones para el sistema de rewards).")
+st.markdown("---")
+
+# Sección 2: El Catálogo y los Botones de DESCARGA (Guiados)
+st.markdown("### Selecciona el sticker para descargar</h3>", unsafe_allow_html=True)
+st.write("Estamos en construcción. Si ves un error, es porque nos falta el archivo del sticker.")
+
+col1, col2, col3, col4 = st.columns(4)
+
+# Función para simular data de imagen para descarga real (para este ejemplo)
+def get_dummy_data():
+    return io.BytesIO(b"\x00" * 1024).read()
+
+# Función para intentar cargar un sticker de forma segura
+def mostrar_sticker(column, filename, sticker_title, dl_id):
+    with column:
+        # El código busca el archivo individual. Si no existe, muestra un error guiado.
+        if os.path.exists(filename):
+            st.image(filename, use_container_width=True)
+            st.markdown(f"<h4 style='color:#f2a900;'>{sticker_title}</h4>", unsafe_allow_html=True)
+            st.download_button(
+                label="DESCARGAR ⬇️", 
+                data=get_dummy_data(), # Reemplazar por data real de la imagen en prod.
+                file_name=f"udal_sticker_{filename}", 
+                mime="image/png", 
+                key=dl_id
+            )
+        else:
+            # ERROR GUIADO: El simulador te dice exactamente qué te falta.
+            st.markdown(f"<div class='udal-card' style='border-color:#880808; text-align:center;'>", unsafe_allow_html=True)
+            st.error(f"Falta el archivo: **`{filename}`**")
+            st.markdown("<p style='font-size:0.8rem;'>Suba el sticker individual a GitHub con este nombre exacto.</p>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+
+# 1. Sticker 1
+mostrar_sticker(col1, "sticker_1.png", "Diseño 1", "dl1")
+
+# 2. Sticker 2
+mostrar_sticker(col2, "sticker_2.png", "Diseño 2", "dl2")
+
+# 3. Sticker 3
+mostrar_sticker(col3, "sticker_3.png", "Diseño 3", "dl3")
+
+# 4. Sticker 4
+mostrar_sticker(col4, "sticker_4.png", "Diseño 4", "dl4")
+
+st.markdown("---")
+
+# ==========================================
+# 4. NUEVA SECCIÓN DE INFORMACIÓN Y CONTACTO
+# ==========================================
+st.markdown("### MÁS INFORMACIÓN DEL PROYECTO 360</h3>", unsafe_allow_html=True)
+
+col_info, col_contacto = st.columns([2, 1])
+
+# Información Académica
+with col_info:
+    st.markdown("<div class='udal-card' style='border-color:#f2a900; box-shadow: 0 4px 20px rgba(242, 169, 0, 0.3);'>", unsafe_allow_html=True)
+    st.markdown("<b style='color:#f2a900; font-size:1.1rem;'>Urban Development Academic Lab (UDAL) - Puebla</b>", unsafe_allow_html=True)
+    st.markdown("""
+    El UDAL es una aceleradora de talento y centro de investigación en diseño y comunicación de Puebla. Este proyecto de stickers es la primera fase del lanzamiento de la Aceleradora UDAL, buscando la creación de productos que marquen la pauta en la escena urbana.
+    
+    Este simulador es un ejercicio académico integral de Diseño Gráfico que conecta la planeación corporativa (misión, visión, FODA) con el desarrollo técnico de productos (INCI, COFEPRIS) y estrategias de marketing bilingües de alto nivel.
+    """, unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# Sección de Contacto WhatsApp (LOGO FUNCIONAL)
+with col_contacto:
+    st.markdown("<div class='udal-card' style='text-align:center;'>", unsafe_allow_html=True)
+    st.markdown("<b style='color:#ccc; font-size:1.1rem; text-transform:uppercase;'>Contáctanos vía WhatsApp</b>", unsafe_allow_html=True)
+    st.write("Dudas, informes o envía tus fotos para la rifa.")
+    
+    # URL de WhatsApp con mensaje pre-escrito a tu celular: 2221158614
+    whatsapp_url = "https://wa.me/5212221158614?text=Hola UDAL Academic Lab, requiero informes sobre el proyecto de stickers y la Aceleradora de Talento."
+    
+    # Logo de WhatsApp como enlace clickable
+    st.markdown(f'<div class="whatsapp-logo-container"><a href="{whatsapp_url}"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp UDAL Lab"></a></div>', unsafe_allow_html=True)
+    
+    # Botón de texto alternativo
+    st.markdown(f'<a href="{whatsapp_url}" class="udal-contact-btn">2221158614</a>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
