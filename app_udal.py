@@ -87,8 +87,8 @@ with col_disenos:
             
     # 2. AGGROUDAL (Actualizado a .jpeg)
     with grid_col2:
-        if os.path.exists("aggroudal.jpeg"): st.image("aggroudal.jpeg", use_container_width=True)
-        else: st.error("Falta: aggroudal.jpeg")
+        if os.path.exists("aggroudal.jfif"): st.image("aggroudal.jfif", use_container_width=True)
+        else: st.error("Falta: aggroudal.jfif")
         st.markdown("<h4 style='color:#f2a900; margin-top:10px;'>AGGROUDAL</h4>", unsafe_allow_html=True)
         st.caption("<b style='font-size:1.1rem;'>Viste como lo que eres, se fuerte, se exitoso</b>", unsafe_allow_html=True)
         if st.button("🗳️ Votar por AGGROUDAL", key="aggro"): registrar_voto("AGGROUDAL")
