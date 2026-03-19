@@ -77,18 +77,18 @@ with col_disenos:
     
     grid_col1, grid_col2 = st.columns(2)
     
-    # 1. VANDAL ROOTS
+    # 1. VANDAL ROOTS (Actualizado a .jpeg)
     with grid_col1:
-        if os.path.exists("vandal_roots.jpg"): st.image("vandal_roots.jpg", use_container_width=True)
-        else: st.error("Falta: vandal_roots.jpg")
+        if os.path.exists("vandal_roots.jpeg"): st.image("vandal_roots.jpeg", use_container_width=True)
+        else: st.error("Falta: vandal_roots.jpeg")
         st.markdown("<h4 style='color:#f2a900; margin-top:10px;'>VANDAL ROOTS</h4>", unsafe_allow_html=True)
         st.caption("<b style='font-size:1.1rem;'>Luce con orgullo tu escuela</b>", unsafe_allow_html=True)
         if st.button("🗳️ Votar por VANDAL ROOTS", key="vandal"): registrar_voto("VANDAL ROOTS")
             
-    # 2. AGGROUDAL
+    # 2. AGGROUDAL (Actualizado a .jpeg)
     with grid_col2:
-        if os.path.exists("aggroudal.jpg"): st.image("aggroudal.jpg", use_container_width=True)
-        else: st.error("Falta: aggroudal.jpg")
+        if os.path.exists("aggroudal.jpeg"): st.image("aggroudal.jpeg", use_container_width=True)
+        else: st.error("Falta: aggroudal.jpeg")
         st.markdown("<h4 style='color:#f2a900; margin-top:10px;'>AGGROUDAL</h4>", unsafe_allow_html=True)
         st.caption("<b style='font-size:1.1rem;'>Viste como lo que eres, se fuerte, se exitoso</b>", unsafe_allow_html=True)
         if st.button("🗳️ Votar por AGGROUDAL", key="aggro"): registrar_voto("AGGROUDAL")
@@ -96,18 +96,18 @@ with col_disenos:
     st.write("---")
     grid_col3, grid_col4 = st.columns(2)
     
-    # 3. STREET
+    # 3. STREET (Actualizado a .jpeg)
     with grid_col3:
-        if os.path.exists("street.jpg"): st.image("street.jpg", use_container_width=True)
-        else: st.error("Falta: street.jpg")
+        if os.path.exists("street.jpeg"): st.image("street.jpeg", use_container_width=True)
+        else: st.error("Falta: street.jpeg")
         st.markdown("<h4 style='color:#f2a900; margin-top:10px;'>STREET</h4>", unsafe_allow_html=True)
         st.caption("<b style='font-size:1.1rem;'>Orgullos que se viste | Pocas piezas</b>", unsafe_allow_html=True)
         if st.button("🗳️ Votar por STREET", key="street"): registrar_voto("STREET")
             
-    # 4. LEOR (Texto unificado)
+    # 4. LEOR (Actualizado a .jpeg)
     with grid_col4:
-        if os.path.exists("leor.jpg"): st.image("leor.jpg", use_container_width=True)
-        else: st.error("Falta: leor.jpg")
+        if os.path.exists("leor.jpeg"): st.image("leor.jpeg", use_container_width=True)
+        else: st.error("Falta: leor.jpeg")
         st.markdown("<h4 style='color:#f2a900; margin-top:10px;'>LEOR</h4>", unsafe_allow_html=True)
         st.caption("<b style='font-size:1.1rem;'>Tu estilo pide más... Nosotros ya lo creamos. No es ropa cualquiera, es la que todos quisieran tener.</b>", unsafe_allow_html=True)
         if st.button("🗳️ Votar por LEOR", key="leor"): registrar_voto("LEOR")
@@ -136,7 +136,7 @@ with col_interaccion:
         st.download_button("📥 Descargar Reporte de Votos (CSV)", f, file_name="reporte_votos_udal.csv")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # NUEVO: SECCIÓN DE COMPARTIR Y QR URBANO
+    # SECCIÓN DE COMPARTIR Y QR URBANO
     st.markdown("<div class='udal-card' style='text-align:center;'>", unsafe_allow_html=True)
     st.markdown("<h4 style='color: #002366;'>🌐 Comparte la Tienda</h4>", unsafe_allow_html=True)
     
@@ -167,6 +167,7 @@ def mostrar_sticker(columna, archivo_sticker, titulo):
             st.image(archivo_sticker, use_container_width=True)
             st.markdown(f"<h4 style='color:#f2a900; font-size:1.2rem;'>{titulo}</h4>", unsafe_allow_html=True)
             with open(archivo_sticker, "rb") as file:
+                # El download file_name puede quedar .png si son stickers recortados sin fondo
                 st.download_button(label="DESCARGAR ⬇️", data=file, file_name=f"UDAL_{titulo}.png", mime="image/png", key=f"dl_{titulo}")
         else:
             st.error(f"⚠️ Falta archivo: {archivo_sticker}")
