@@ -77,8 +77,8 @@ with col_disenos:
     
     # 1. VANDAL ROOTS
     with grid_col1:
-        if os.path.exists("vandal_roots.jpg"): st.image("vandal_roots.jpg", use_container_width=True)
-        else: st.error("Falta: vandal_roots.jpg")
+        if os.path.exists("vandal_roots.jpeg"): st.image("vandal_roots.jpeg", use_container_width=True)
+        else: st.error("Falta: vandal_roots.jpeg")
         
         st.markdown("<h4 style='color:#f2a900; margin-top:10px;'>VANDAL ROOTS</h4>", unsafe_allow_html=True)
         st.caption("<b style='font-size:1.1rem;'>Luce con orgullo tu escuela</b>", unsafe_allow_html=True)
@@ -86,8 +86,8 @@ with col_disenos:
             
     # 2. AGGROUDAL
     with grid_col2:
-        if os.path.exists("aggroudal.jpg"): st.image("aggroudal.jpg", use_container_width=True)
-        else: st.error("Falta: aggroudal.jpg")
+        if os.path.exists("aggroudal.jpeg"): st.image("aggroudal.jpeg", use_container_width=True)
+        else: st.error("Falta: aggroudal.jpeg")
         
         st.markdown("<h4 style='color:#f2a900; margin-top:10px;'>AGGROUDAL</h4>", unsafe_allow_html=True)
         st.caption("<b style='font-size:1.1rem;'>Viste como lo que eres, se fuerte, se exitoso</b>", unsafe_allow_html=True)
@@ -98,8 +98,8 @@ with col_disenos:
     
     # 3. STREET
     with grid_col3:
-        if os.path.exists("street.jpg"): st.image("street.jpg", use_container_width=True)
-        else: st.error("Falta: street.jpg")
+        if os.path.exists("street.jpeg"): st.image("street.jpeg", use_container_width=True)
+        else: st.error("Falta: street.jpeg")
         
         st.markdown("<h4 style='color:#f2a900; margin-top:10px;'>STREET</h4>", unsafe_allow_html=True)
         st.caption("<b style='font-size:1.1rem;'>Orgullos que se viste</b> | Pocas piezas disponibles", unsafe_allow_html=True)
@@ -107,8 +107,8 @@ with col_disenos:
             
     # 4. LEOR
     with grid_col4:
-        if os.path.exists("leor.jpg"): st.image("leor.jpg", use_container_width=True)
-        else: st.error("Falta: leor.jpg")
+        if os.path.exists("leor.jpeg"): st.image("leor.jpeg", use_container_width=True)
+        else: st.error("Falta: leor.jpeg")
         
         st.markdown("<h4 style='color:#f2a900; margin-top:10px;'>LEOR</h4>", unsafe_allow_html=True)
         st.write("<b style='font-size:0.95rem;'>1- Tu estilo pide más... Nosotros ya lo creamos. Solo tómalo.</b>", unsafe_allow_html=True)
